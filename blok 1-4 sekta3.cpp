@@ -24,7 +24,10 @@ void zwolnijStrukture(tablicaDynamiczna& tabDyn)
 void zapiszTablice(tablicaDynamiczna& tab, const char* nazwaPliku)
 {
     FILE* plik = fopen(nazwaPliku, "w");
-
+    if (plik == nullptr) {
+        std::cerr << "Blad otwarcia pliku do zapisu!" << std::endl;
+        exit(1);
+    }
     fprintf(plik, "%d\n", tab.rozmiar);
     for (int i = 0; i < tab.rozmiar; i++)
     {
@@ -37,12 +40,26 @@ tablicaDynamiczna odczytajTabliceZPliku(const char* nazwaPliku)
 {
     int rozmiar;
     FILE* plik = fopen(nazwaPliku, "r");
-    fscanf(plik, "%d", &rozmiar);
+    if (plik == nullptr) {
+        std::cerr << "Blad otwarcia pliku do odczytu!" << std::endl;
+        exit(1);
+    }
+    if (fscanf(plik, "%d\n", &rozmiar) != 1) {
+        std::cerr << "Blad odczytu rozmiaru tablicy!" << std::endl;
+        fclose(plik);
+        exit(1);
+    }
     std::cout << "rozmiar: " << rozmiar<<"\n";
     tablicaDynamiczna tabDynn = utworzStrukture(rozmiar);
     for (int i = 0; i < rozmiar; ++i) {
-        fscanf(plik, "%d", &tabDynn.tablica[i]);
+        if (fscanf(plik, "%d;", &tabDynn.tablica[i]) != 1) {
+            std::cerr << "Blad odczytu elementu tablicy na pozycji " << i << "!" << std::endl;
+            fclose(plik);
+            zwolnijStrukture(tabDynn);
+            exit(1);
+        }
     }
+
     fclose(plik);
     return tabDynn;
 }
